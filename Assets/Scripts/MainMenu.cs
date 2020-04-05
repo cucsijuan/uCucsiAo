@@ -63,7 +63,7 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         // Connect to the server.
-        gameSocket.Connect("127.0.0.1", 7666);
+        gameSocket.Connect("localhost", 7666);
         Debug.Log("Current game state when Starts: " + GM.gameState);
         GM.SetGameState(GameState.MAIN_MENU);
     }

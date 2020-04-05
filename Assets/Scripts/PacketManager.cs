@@ -1474,6 +1474,8 @@ public class PacketManager : MonoBehaviour
     {
         GM.outgoingData.locked = true;
 
+        GM.outgoingData.WriteByte((byte)ClientPacketID.LoginNewAccount);
+
         GM.outgoingData.WriteASCIIString(email);
         GM.outgoingData.WriteASCIIString(password);
 
