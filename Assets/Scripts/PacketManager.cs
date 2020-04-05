@@ -1470,6 +1470,21 @@ public class PacketManager : MonoBehaviour
         GM.outgoingData.locked = false;
     }
 
+    public void WriteLoginNewAccount(string email, string password)
+    {
+        GM.outgoingData.locked = true;
+
+        GM.outgoingData.WriteASCIIString(email);
+        GM.outgoingData.WriteASCIIString(password);
+
+        //App version
+        GM.outgoingData.WriteByte(0);
+        GM.outgoingData.WriteByte(13);
+        GM.outgoingData.WriteByte(0);
+
+        GM.outgoingData.locked = false;
+    }
+
     public void WriteWalk(byte heading)
     {
         GM.outgoingData.locked = true;

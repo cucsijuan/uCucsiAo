@@ -25,7 +25,7 @@ public class TcpSocket : UnityEngine.Object
         new ManualResetEvent(false);
 
     // The response from the remote device.  
-    private static String response = String.Empty;
+    private static string response = string.Empty;
 
     Socket client;
 
