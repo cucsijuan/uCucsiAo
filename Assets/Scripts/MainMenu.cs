@@ -31,11 +31,20 @@ public class MainMenu : MonoBehaviour
     PacketManager packetManager;
     TcpSocket gameSocket;
 
-
+    // Panel PJ's
     [SerializeField] public Image CharSelectionPanel;
     [SerializeField] public TMP_Dropdown CharSelectionDropdown;
+
+    // Panel - Login
+    [SerializeField] public Image LoginPanel;
     [SerializeField] public TMP_InputField AccountText;
     [SerializeField] public TMP_InputField PasswordText;
+
+    // Panel - Create Account
+    [SerializeField] public Image AccountCreationPanel;
+    [SerializeField] public TMP_InputField EmailText;
+    [SerializeField] public TMP_InputField CreateAccount_PasswordText;
+    [SerializeField] public TMP_InputField CreateAccount_ConfirmPasswordText;
 
     void Awake()
     {
@@ -44,7 +53,7 @@ public class MainMenu : MonoBehaviour
         GM.MainMenuWindow = this;
         GM.InitProtocol();
 
-        packetManager = PacketManager.Instance;        
+        packetManager = PacketManager.Instance;
 
         gameSocket = AOGameManager.gameSocket;
 
@@ -53,6 +62,8 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+        // Connect to the server.
+        gameSocket.Connect("localhost", 7666);
         Debug.Log("Current game state when Starts: " + GM.gameState);
         GM.SetGameState(GameState.MAIN_MENU);
     }
@@ -67,22 +78,45 @@ public class MainMenu : MonoBehaviour
 
     }
 
+    private void ShowScreen(Image screenToShow)
+    {
+        // Busco todos los elementos con el tag "screens"
+        GameObject[] screens = GameObject.FindGameObjectsWithTag("screens");
+
+        // Los oculto.
+        foreach (GameObject screen in screens)
+        {
+            screen.SetActive(false);
+        }
+
+        // Abro el que quiero.
+        screenToShow.gameObject.SetActive(true);
+    }
+
     private void HandleTCPData()
     {
-        if (gameSocket.IsDataAvailableToRead())
+        try
         {
-            gameSocket.Receive();
-        }
+            if (gameSocket.IsDataAvailableToRead())
+            {
+                gameSocket.Receive();
+            }
 
-        if (GM.incomingData.queueLength > 0)
-        {
-            packetManager.HandleReceivedData();
-        }
+            if (GM.incomingData.queueLength > 0)
+            {
+                packetManager.HandleReceivedData();
+            }
 
-        if (!GM.outgoingData.locked && GM.outgoingData.queueLength > 0)
+            if (!GM.outgoingData.locked && GM.outgoingData.queueLength > 0)
+            {
+                GM.FlushBuffer();
+            }
+
+        } catch(System.Exception ex)
         {
-            GM.FlushBuffer();
+            Debug.Log("Error: " + ex.StackTrace);
         }
+        
     }
 
     public void HandleOnStateChange()
@@ -96,18 +130,37 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("Menu");
     }
 
-    public void OnConnectClicked()
+    public void LoginPanel_OnConnectClicked()
     {
-        gameSocket.Connect("Localhost", 7666);
-
         packetManager.WriteLoginExistingAccount(AccountText.text, PasswordText.text);
-        Debug.Log("Starting Client");
+        Debug.Log("Sending account login");
     }
 
-    public void OnLoginClicked()
+    public void LoginPanel_OnLoginClicked()
     {
         packetManager.WriteLoginExistingChar(CharSelectionDropdown.options[CharSelectionDropdown.value].text, GM.currentAccount.accountHash);
         Debug.Log("Logging with " + CharSelectionDropdown.options[CharSelectionDropdown.value].text);
+    }
+    
+
+    public void LoginPanel_OnCreateAccountClicked()
+    {
+        ShowScreen(AccountCreationPanel);
+    }
+
+    public void AccountCreationPanel_OnCreateAccountClicked()
+    {
+        if(!CreateAccount_PasswordText.text.Equals(CreateAccount_ConfirmPasswordText.text)) return;
+        
+        packetManager.WriteLoginNewAccount(EmailText.text, CreateAccount_PasswordText.text);
+
+        Debug.Log("Creating account with  " + EmailText.text + " and pass " + CreateAccount_ConfirmPasswordText.text);
+
+    }
+
+    public void AccountCreationPanel_OnBackClicked()
+    {
+        ShowScreen(LoginPanel);
     }
 
 }
