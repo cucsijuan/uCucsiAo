@@ -78,6 +78,21 @@ public class MainMenu : MonoBehaviour
 
     }
 
+    private void ShowScreen(Image screenToShow)
+    {
+        // Busco todos los elementos con el tag "screens"
+        GameObject[] screens = GameObject.FindGameObjectsWithTag("screens");
+
+        // Los oculto.
+        foreach (GameObject screen in screens)
+        {
+            screen.SetActive(false);
+        }
+
+        // Abro el que quiero.
+        screenToShow.gameObject.SetActive(true);
+    }
+
     private void HandleTCPData()
     {
         try
@@ -130,8 +145,7 @@ public class MainMenu : MonoBehaviour
 
     public void LoginPanel_OnCreateAccountClicked()
     {
-        LoginPanel.gameObject.SetActive(false);
-        AccountCreationPanel.gameObject.SetActive(true);
+        ShowScreen(AccountCreationPanel);
     }
 
     public void AccountCreationPanel_OnCreateAccountClicked()
@@ -146,8 +160,7 @@ public class MainMenu : MonoBehaviour
 
     public void AccountCreationPanel_OnBackClicked()
     {
-        LoginPanel.gameObject.SetActive(true);
-        AccountCreationPanel.gameObject.SetActive(false);
+        ShowScreen(LoginPanel);
     }
 
 }
