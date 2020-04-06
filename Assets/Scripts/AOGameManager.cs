@@ -70,6 +70,20 @@ public struct Character
     public short posY;
 }
 
+public struct GrhData
+{
+    short sX;
+    short sY;
+    int fileNum;
+    short pixelWidth;
+    short pixelHeight;
+    float tileWidth;
+    float TileHeight;
+    short NumFrames;
+    int[] Frames;
+    float speed;
+}
+
 public struct MapData
 {
     public bool blocked;
