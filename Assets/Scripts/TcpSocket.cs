@@ -84,13 +84,6 @@ public class TcpSocket : UnityEngine.Object
 
             // Signal that the connection has been made.  
             connectDone.Set();
-
-            string Account = "a@a.com";
-
-            string Password = "a";
-
-            
-            
         }
         catch (Exception e)
         {
