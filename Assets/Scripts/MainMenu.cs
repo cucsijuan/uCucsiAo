@@ -156,6 +156,8 @@ public class MainMenu : MonoBehaviour
 
         Debug.Log("Creating account with  " + EmailText.text + " and pass " + CreateAccount_ConfirmPasswordText.text);
 
+        ShowScreen(LoginPanel);
+
     }
 
     public void AccountCreationPanel_OnBackClicked()
