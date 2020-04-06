@@ -1433,6 +1433,24 @@ public class PacketManager : MonoBehaviour
 
     }
 
+    public void HandleDiceRoll()
+    {
+        if (GM.incomingData.queueLength < 6)
+        {
+            Debug.Log("HandleDiceRoll: not enough data to read");
+            return;
+        }
+
+        /* TODO: Acomodar este mambo en un objeto con la info. del char.
+        UserAtributos(eAtributos.Fuerza) = GM.incomingData.ReadByte();
+        UserAtributos(eAtributos.Agilidad) = GM.incomingData.ReadByte();
+        UserAtributos(eAtributos.Inteligencia) = GM.incomingData.ReadByte();
+        UserAtributos(eAtributos.Carisma) = GM.incomingData.ReadByte();
+        UserAtributos(eAtributos.Constitucion) = GM.incomingData.ReadByte();
+        */
+
+    }
+
     /*********************************************************************************/
     /********************************** PACKET WRITING *******************************/
     /*********************************************************************************/
@@ -1494,6 +1512,37 @@ public class PacketManager : MonoBehaviour
         GM.outgoingData.WriteByte((byte)ClientPacketID.Walk);
 
         GM.outgoingData.WriteByte(heading);
+
+        GM.outgoingData.locked = false;
+    }
+
+    public void WriteThrowDices()
+    {
+        GM.outgoingData.locked = true;
+
+        GM.outgoingData.WriteByte((byte)ClientPacketID.ThrowDices);
+
+        GM.outgoingData.locked = false;
+    }
+
+    public void WriteLoginNewChar(string nombreChar, int raza, int sexo, int clase, int head, int hogar)
+    {
+        GM.outgoingData.locked = true;
+
+        GM.outgoingData.WriteByte((byte)ClientPacketID.LoginNewChar);
+
+        GM.outgoingData.WriteASCIIString(nombreChar);
+        GM.outgoingData.WriteASCIIString(GM.currentAccount.accountHash);
+
+        GM.outgoingData.WriteByte(0);
+        GM.outgoingData.WriteByte(13);
+        GM.outgoingData.WriteByte(0);
+
+        GM.outgoingData.WriteByte((byte)raza);
+        GM.outgoingData.WriteByte((byte)sexo);
+        GM.outgoingData.WriteByte((byte)clase);
+        GM.outgoingData.WriteByte((byte)head);
+        GM.outgoingData.WriteByte((byte)hogar);
 
         GM.outgoingData.locked = false;
     }

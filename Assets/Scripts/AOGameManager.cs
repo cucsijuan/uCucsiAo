@@ -5,6 +5,52 @@ using UnityEngine;
 // for now we are only using these two
 public enum GameState { INTRO, MAIN_MENU, INGAME }
 
+public enum Gender
+{
+    NADA = 0,
+    HOMBRE = 1,
+    MUJER = 2
+}
+
+public enum Class
+{
+    NADA = 0,
+    MAGO = 1,
+    CLERIGO = 2,
+    GUERRERO = 3,
+    ASESINO = 4,
+    LADRON = 5,
+    BARDO = 6,
+    DRUIDA = 7,
+    BANDIDO = 8,
+    PALADIN = 9,
+    CAZADOR = 10,
+    TRABAJADOR = 11,
+    PIRATA = 12
+}
+
+public enum Homeland
+{
+    NADA = 0,
+    ULLATHORPE = 1,
+    NIX = 2,
+    BANDERBILL = 3,
+    LINDOS = 4,
+    ARGHAL = 5,
+    ARKHEIN = 6,
+    LAST_CITY = 7
+}
+
+public enum Race : byte
+{
+    NADA = 0,
+    HUMANO = 1,
+    ELFO = 2,
+    DROW = 3,
+    GNOMO = 4,
+    ENANO = 5
+}
+
 public enum EHeading : byte
 {
     NONE,
@@ -95,15 +141,12 @@ public class AOGameManager : MonoBehaviour
 {
     public const int NUMSKILLS = 20;
 
-    public event OnStateChangeHandler OnStateChange;    
+    public event OnStateChangeHandler OnStateChange;
 
-    private static AOGameManager _instance;
-    public static AOGameManager Instance => _instance;
-
-    private static TcpSocket _gameSocket;
-    public static TcpSocket gameSocket => _gameSocket;
-
+    public static AOGameManager Instance { get; private set; }
+    public static TcpSocket gameSocket { get; private set; }
     public GameState gameState { get; private set; }
+    
     public AccountInfo currentAccount;
 
     public MainMenu MainMenuWindow;
@@ -120,15 +163,15 @@ public class AOGameManager : MonoBehaviour
 
     void Awake()
     {
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
 
-        if (_instance != null)
+        if (Instance != null)
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
             return;
         }
 
-        _instance = this;
+        Instance = this;
         incomingData = new ByteQueue();
         outgoingData = new ByteQueue();
 
@@ -136,21 +179,21 @@ public class AOGameManager : MonoBehaviour
 
     public void SetGameState(GameState state)
     {
-        this.gameState = state;
+        gameState = state;
         OnStateChange();
     }
 
     public void OnApplicationQuit()
     {
         gameSocket.Disconnect();
-        AOGameManager._instance = null;
+        Instance = null;
     }
 
     public void InitProtocol()
     {
         if (gameSocket == null)
         {
-            _gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
+            gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
             Debug.Log("Protocol created.");
         }
     }
