@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 // Game States
@@ -72,16 +73,16 @@ public struct Character
 
 public struct GrhData
 {
-    short sX;
-    short sY;
-    int fileNum;
-    short pixelWidth;
-    short pixelHeight;
-    float tileWidth;
-    float TileHeight;
-    short NumFrames;
-    int[] Frames;
-    float speed;
+    public short sX;
+    public short sY;
+    public int fileNum;
+    public short pixelWidth;
+    public short pixelHeight;
+    public float tileWidth;
+    public float TileHeight;
+    public short NumFrames;
+    public int[] Frames;
+    public float speed;
 }
 
 public struct MapData
@@ -115,6 +116,7 @@ public class AOGameManager : MonoBehaviour
 
     public Character[] charList = new Character[10000];
     public Dictionary<Vector2, MapData> mapData = new Dictionary<Vector2, MapData>();
+    public GrhData[] grhData;
 
     protected AOGameManager() { }
 
@@ -162,4 +164,5 @@ public class AOGameManager : MonoBehaviour
             gameSocket.Send();
         }
     }
+
 }
