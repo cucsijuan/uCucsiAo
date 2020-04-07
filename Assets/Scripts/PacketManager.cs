@@ -293,8 +293,7 @@ enum ClientPacketID
 
 public class PacketManager : MonoBehaviour
 {
-    private static PacketManager _instance;
-    public static PacketManager Instance => _instance;
+    public static PacketManager Instance { get; private set; }
 
     AOGameManager GM;
 
@@ -303,13 +302,13 @@ public class PacketManager : MonoBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
 
-        if (_instance != null)
+        if (Instance != null)
         {
             Destroy(this.gameObject);
             return;
         }
 
-        _instance = this;
+        Instance = this;
     }
 
     // Update is called once per frame
@@ -485,6 +484,7 @@ public class PacketManager : MonoBehaviour
                 HandleSetInvisible();
                 break;
             case ServerPacketID.DiceRoll:
+                HandleDiceRoll();
                 break;
             case ServerPacketID.MeditateToggle:
                 break;
@@ -1441,13 +1441,15 @@ public class PacketManager : MonoBehaviour
             return;
         }
 
-        /* TODO: Acomodar este mambo en un objeto con la info. del char.
-        UserAtributos(eAtributos.Fuerza) = GM.incomingData.ReadByte();
-        UserAtributos(eAtributos.Agilidad) = GM.incomingData.ReadByte();
-        UserAtributos(eAtributos.Inteligencia) = GM.incomingData.ReadByte();
-        UserAtributos(eAtributos.Carisma) = GM.incomingData.ReadByte();
-        UserAtributos(eAtributos.Constitucion) = GM.incomingData.ReadByte();
-        */
+        GM.incomingData.ReadByte();
+
+        /* TODO: Acomodar este mambo en un objeto con la info. del char. */
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        
 
     }
 

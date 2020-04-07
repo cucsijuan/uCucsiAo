@@ -198,14 +198,39 @@ public class MainMenu : MonoBehaviour
         if (charHomeland.value.Equals(Homeland.NADA)) return;
 
         //TODO: ver el manbo ese de las cabezas con las razas, generos, etc...
+        // Mientras tanto usamos esta villereada by Cucsi para salir del paso.
+        switch(charRace.value)
+        {
+            case (byte)Race.HUMANO:
+                charHead.value = 1;
+                break;
 
-        packetManager.WriteLoginNewChar(charName.text, charRace.value, charGender.value, charClass.value, 0, charHomeland.value);
+            case (byte)Race.ELFO:
+                charHead.value = 101;
+                break;
+
+            case (byte)Race.DROW:
+                charHead.value = 201;
+                break;
+
+            case (byte)Race.ENANO:
+                charHead.value = 301;
+                break;
+
+            case (byte)Race.GNOMO:
+                charHead.value = 401;
+                break;
+        }
+
+        packetManager.WriteLoginNewChar(charName.text, charRace.value, charGender.value, charClass.value, charHead.value, charHomeland.value);
         Debug.Log("Creando personaje con nombre: " + charName.text +
                                         " , raza: " + charRace.value +
                                         " , genero: " + charGender.value +
                                         " , clase: " + charClass.value +
                                         " , ciudad de origen: " + charHomeland.value +
                                         " , cabeza: " + charHead.value);
+
+        ShowScreen(CharSelectionPanel);
     }
     
     public void CharCreationPanel_OnDadosButtonClicked()
