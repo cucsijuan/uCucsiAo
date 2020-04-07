@@ -191,7 +191,7 @@ public class MainMenu : MonoBehaviour
 
     public void CharCreationPanel_OnCrearPersonajeClicked()
     {
-        if (charName.text != "")  return;
+        if (charName.text == "")  return;
         if (charRace.value.Equals(Race.NADA)) return;
         if (charGender.value.Equals(Gender.NADA)) return;
         if (charClass.value.Equals(Class.NADA)) return;
@@ -199,36 +199,38 @@ public class MainMenu : MonoBehaviour
 
         //TODO: ver el manbo ese de las cabezas con las razas, generos, etc...
         // Mientras tanto usamos esta villereada by Cucsi para salir del paso.
-        switch(charRace.value)
+        int head = 1;
+
+        switch (charRace.value)
         {
             case (byte)Race.HUMANO:
-                charHead.value = 1;
+                head = 1;
                 break;
 
             case (byte)Race.ELFO:
-                charHead.value = 101;
+                head = 101;
                 break;
 
             case (byte)Race.DROW:
-                charHead.value = 201;
+                head = 201;
                 break;
 
             case (byte)Race.ENANO:
-                charHead.value = 301;
+                head = 301;
                 break;
 
             case (byte)Race.GNOMO:
-                charHead.value = 401;
+                head = 401;
                 break;
         }
 
-        packetManager.WriteLoginNewChar(charName.text, charRace.value, charGender.value, charClass.value, charHead.value, charHomeland.value);
+        packetManager.WriteLoginNewChar(charName.text, charRace.value, charGender.value, charClass.value, head, charHomeland.value);
         Debug.Log("Creando personaje con nombre: " + charName.text +
                                         " , raza: " + charRace.value +
                                         " , genero: " + charGender.value +
                                         " , clase: " + charClass.value +
                                         " , ciudad de origen: " + charHomeland.value +
-                                        " , cabeza: " + charHead.value);
+                                        " , cabeza: " + head);
 
         ShowScreen(CharSelectionPanel);
     }

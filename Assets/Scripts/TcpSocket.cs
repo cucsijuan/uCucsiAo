@@ -60,7 +60,6 @@ public class TcpSocket : UnityEngine.Object
             // Connect to the remote endpoint.  
             client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
-            connectDone.WaitOne();
 
         }
         catch (System.Exception e)

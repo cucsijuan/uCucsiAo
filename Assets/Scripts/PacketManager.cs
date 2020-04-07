@@ -457,6 +457,7 @@ public class PacketManager : MonoBehaviour
             case ServerPacketID.RestOK:
                 break;
             case ServerPacketID.errorMsg:
+                HandleErrorMessage();
                 break;
             case ServerPacketID.Blind:
                 break;
@@ -1453,6 +1454,28 @@ public class PacketManager : MonoBehaviour
 
     }
 
+    public void HandleErrorMessage()
+    {
+        if (GM.incomingData.queueLength < 3)
+        {
+            Debug.Log("HandleErrorMessage: not enough data to read");
+            return;
+        }
+
+        ByteQueue buffer = new ByteQueue();
+
+        buffer.CopyBuffer(GM.incomingData);
+
+        buffer.ReadByte();
+
+        Debug.LogError("Server Error: " + buffer.ReadASCIIString());
+
+        //TODO: aca desconecta el socket pero solo si no esta el frm crear pj visible (por que??)
+
+        GM.incomingData.CopyBuffer(buffer);
+
+    }
+
     /*********************************************************************************/
     /********************************** PACKET WRITING *******************************/
     /*********************************************************************************/
@@ -1543,7 +1566,7 @@ public class PacketManager : MonoBehaviour
         GM.outgoingData.WriteByte((byte)raza);
         GM.outgoingData.WriteByte((byte)sexo);
         GM.outgoingData.WriteByte((byte)clase);
-        GM.outgoingData.WriteByte((byte)head);
+        GM.outgoingData.WriteInt16((short)head);
         GM.outgoingData.WriteByte((byte)hogar);
 
         GM.outgoingData.locked = false;
