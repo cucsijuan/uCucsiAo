@@ -293,8 +293,7 @@ enum ClientPacketID
 
 public class PacketManager : MonoBehaviour
 {
-    private static PacketManager _instance;
-    public static PacketManager Instance => _instance;
+    public static PacketManager Instance { get; private set; }
 
     AOGameManager GM;
 
@@ -303,13 +302,13 @@ public class PacketManager : MonoBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
 
-        if (_instance != null)
+        if (Instance != null)
         {
             Destroy(this.gameObject);
             return;
         }
 
-        _instance = this;
+        Instance = this;
     }
 
     // Update is called once per frame
@@ -458,6 +457,7 @@ public class PacketManager : MonoBehaviour
             case ServerPacketID.RestOK:
                 break;
             case ServerPacketID.errorMsg:
+                HandleErrorMessage();
                 break;
             case ServerPacketID.Blind:
                 break;
@@ -485,6 +485,7 @@ public class PacketManager : MonoBehaviour
                 HandleSetInvisible();
                 break;
             case ServerPacketID.DiceRoll:
+                HandleDiceRoll();
                 break;
             case ServerPacketID.MeditateToggle:
                 break;
@@ -1433,6 +1434,48 @@ public class PacketManager : MonoBehaviour
 
     }
 
+    public void HandleDiceRoll()
+    {
+        if (GM.incomingData.queueLength < 6)
+        {
+            Debug.Log("HandleDiceRoll: not enough data to read");
+            return;
+        }
+
+        GM.incomingData.ReadByte();
+
+        /* TODO: Acomodar este mambo en un objeto con la info. del char. */
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        GM.incomingData.ReadByte();
+        
+
+    }
+
+    public void HandleErrorMessage()
+    {
+        if (GM.incomingData.queueLength < 3)
+        {
+            Debug.Log("HandleErrorMessage: not enough data to read");
+            return;
+        }
+
+        ByteQueue buffer = new ByteQueue();
+
+        buffer.CopyBuffer(GM.incomingData);
+
+        buffer.ReadByte();
+
+        Debug.LogError("Server Error: " + buffer.ReadASCIIString());
+
+        //TODO: aca desconecta el socket pero solo si no esta el frm crear pj visible (por que??)
+
+        GM.incomingData.CopyBuffer(buffer);
+
+    }
+
     /*********************************************************************************/
     /********************************** PACKET WRITING *******************************/
     /*********************************************************************************/
@@ -1494,6 +1537,37 @@ public class PacketManager : MonoBehaviour
         GM.outgoingData.WriteByte((byte)ClientPacketID.Walk);
 
         GM.outgoingData.WriteByte(heading);
+
+        GM.outgoingData.locked = false;
+    }
+
+    public void WriteThrowDices()
+    {
+        GM.outgoingData.locked = true;
+
+        GM.outgoingData.WriteByte((byte)ClientPacketID.ThrowDices);
+
+        GM.outgoingData.locked = false;
+    }
+
+    public void WriteLoginNewChar(string nombreChar, int raza, int sexo, int clase, int head, int hogar)
+    {
+        GM.outgoingData.locked = true;
+
+        GM.outgoingData.WriteByte((byte)ClientPacketID.LoginNewChar);
+
+        GM.outgoingData.WriteASCIIString(nombreChar);
+        GM.outgoingData.WriteASCIIString(GM.currentAccount.accountHash);
+
+        GM.outgoingData.WriteByte(0);
+        GM.outgoingData.WriteByte(13);
+        GM.outgoingData.WriteByte(0);
+
+        GM.outgoingData.WriteByte((byte)raza);
+        GM.outgoingData.WriteByte((byte)sexo);
+        GM.outgoingData.WriteByte((byte)clase);
+        GM.outgoingData.WriteInt16((short)head);
+        GM.outgoingData.WriteByte((byte)hogar);
 
         GM.outgoingData.locked = false;
     }

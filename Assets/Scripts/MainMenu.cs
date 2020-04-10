@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 struct pjCuenta
 {
@@ -29,10 +30,6 @@ public class MainMenu : MonoBehaviour
     PacketManager packetManager;
     TcpSocket gameSocket;
 
-    // Panel PJ's
-    [SerializeField] public Image CharSelectionPanel;
-    [SerializeField] public TMP_Dropdown CharSelectionDropdown;
-
     // Panel - Login
     [SerializeField] public Image LoginPanel;
     [SerializeField] public TMP_InputField AccountText;
@@ -43,6 +40,19 @@ public class MainMenu : MonoBehaviour
     [SerializeField] public TMP_InputField EmailText;
     [SerializeField] public TMP_InputField CreateAccount_PasswordText;
     [SerializeField] public TMP_InputField CreateAccount_ConfirmPasswordText;
+
+    // Panel - CharSelectionPanel
+    [SerializeField] public Image CharSelectionPanel;
+    [SerializeField] public TMP_Dropdown CharSelectionDropdown;
+
+    // Panel - CharCreationPanel
+    [SerializeField] public Image CharCreationPanel;
+    [SerializeField] public TMP_InputField charName;
+    [SerializeField] public TMP_Dropdown charHomeland;
+    [SerializeField] public TMP_Dropdown charRace;
+    [SerializeField] public TMP_Dropdown charGender;
+    [SerializeField] public TMP_Dropdown charClass;
+    [SerializeField] public TMP_Dropdown charHead;
 
     void Awake()
     {
@@ -140,10 +150,26 @@ public class MainMenu : MonoBehaviour
         Debug.Log("Logging with " + CharSelectionDropdown.options[CharSelectionDropdown.value].text);
     }
     
-
     public void LoginPanel_OnCreateAccountClicked()
     {
         ShowScreen(AccountCreationPanel);
+    }
+
+    public void CharSelectionPanel_OnCreateCharClicked()
+    {
+        ShowScreen(CharCreationPanel);
+
+        // Listamos los valores de los enums Raza, Genero, Homeland y Clase.
+        List<string> listSexo = new List<string>(System.Enum.GetNames(typeof(Gender)));
+        List<string> listClases = new List<string>(System.Enum.GetNames(typeof(Class)));
+        List<string> listHomeland = new List<string>(System.Enum.GetNames(typeof(Homeland)));
+        List<string> listRazas = new List<string>(System.Enum.GetNames(typeof(Race)));
+
+        // Agregamos las opciones a su respectivo dropdown.
+        charGender.AddOptions(listSexo);
+        charClass.AddOptions(listClases);
+        charHomeland.AddOptions(listHomeland);
+        charRace.AddOptions(listRazas);
     }
 
     public void AccountCreationPanel_OnCreateAccountClicked()
@@ -163,4 +189,60 @@ public class MainMenu : MonoBehaviour
         ShowScreen(LoginPanel);
     }
 
+    public void CharCreationPanel_OnCrearPersonajeClicked()
+    {
+        if (charName.text == "")  return;
+        if (charRace.value.Equals(Race.NADA)) return;
+        if (charGender.value.Equals(Gender.NADA)) return;
+        if (charClass.value.Equals(Class.NADA)) return;
+        if (charHomeland.value.Equals(Homeland.NADA)) return;
+
+        //TODO: ver el manbo ese de las cabezas con las razas, generos, etc...
+        // Mientras tanto usamos esta villereada by Cucsi para salir del paso.
+        int head = 1;
+
+        switch (charRace.value)
+        {
+            case (byte)Race.HUMANO:
+                head = 1;
+                break;
+
+            case (byte)Race.ELFO:
+                head = 101;
+                break;
+
+            case (byte)Race.DROW:
+                head = 201;
+                break;
+
+            case (byte)Race.ENANO:
+                head = 301;
+                break;
+
+            case (byte)Race.GNOMO:
+                head = 401;
+                break;
+        }
+
+        packetManager.WriteLoginNewChar(charName.text, charRace.value, charGender.value, charClass.value, head, charHomeland.value);
+        Debug.Log("Creando personaje con nombre: " + charName.text +
+                                        " , raza: " + charRace.value +
+                                        " , genero: " + charGender.value +
+                                        " , clase: " + charClass.value +
+                                        " , ciudad de origen: " + charHomeland.value +
+                                        " , cabeza: " + head);
+
+        ShowScreen(CharSelectionPanel);
+    }
+    
+    public void CharCreationPanel_OnDadosButtonClicked()
+    {
+        packetManager.WriteThrowDices();
+        Debug.Log("Tirando dados...");
+    }
+
+    public void CharCreationPanel_OnBackClicked()
+    {
+        ShowScreen(CharSelectionPanel);
+    }
 }
