@@ -91,7 +91,7 @@ public class SpriteBackgroundRemove : EditorWindow
             for (int p = 0; p < pixels.Length; p++)
             {
                
-                if (Mathf.Abs(pixels[p].r - c.r) < tolerance && Mathf.Abs(pixels[p].g - c.g) < tolerance && Mathf.Abs(pixels[p].b - c.b) < tolerance && Mathf.Abs(pixels[p].a - c.a) < tolerance)
+                if (Mathf.Abs(pixels[p].r - c.r) <= tolerance && Mathf.Abs(pixels[p].g - c.g) <= tolerance && Mathf.Abs(pixels[p].b - c.b) <= tolerance && Mathf.Abs(pixels[p].a - c.a) <= tolerance)
                 {
                     pixels[p] = clear;
                 }
@@ -102,7 +102,7 @@ public class SpriteBackgroundRemove : EditorWindow
             n.Apply();
 
             byte[] bytes = n.EncodeToPNG();
-            File.WriteAllBytes("Assets/AlphaImages/" + i.name + "_alpha.png", bytes);
+            File.WriteAllBytes("Assets/AlphaImages/" + i.name + ".png", bytes);
         }
 
         EditorUtility.ClearProgressBar();
@@ -128,7 +128,7 @@ public class SpriteBackgroundRemove : EditorWindow
                 break;
             }
 
-            if (Mathf.Abs(pixels[p].r - c.r) < tolerance && Mathf.Abs(pixels[p].g - c.g) < tolerance && Mathf.Abs(pixels[p].b - c.b) < tolerance && Mathf.Abs(pixels[p].a - c.a) < tolerance)
+            if (Mathf.Abs(pixels[p].r - c.r) <= tolerance && Mathf.Abs(pixels[p].g - c.g) <= tolerance && Mathf.Abs(pixels[p].b - c.b) <= tolerance && Mathf.Abs(pixels[p].a - c.a) <= tolerance)
             {
                 pixels[p] = clear;
             }
