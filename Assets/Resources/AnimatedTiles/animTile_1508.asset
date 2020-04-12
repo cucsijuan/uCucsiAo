@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: animTile_1508
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: -5622098513726520222, guid: 0cdc63cc2b143c24fa59e2bae3cfdfb3, type: 3}
+  - {fileID: -1960017832309878007, guid: 0cdc63cc2b143c24fa59e2bae3cfdfb3, type: 3}
+  - {fileID: 4146155406463653110, guid: 0cdc63cc2b143c24fa59e2bae3cfdfb3, type: 3}
+  - {fileID: 8756320840856195678, guid: 0cdc63cc2b143c24fa59e2bae3cfdfb3, type: 3}
+  m_MinSpeed: 1
+  m_MaxSpeed: 4.5045047
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
