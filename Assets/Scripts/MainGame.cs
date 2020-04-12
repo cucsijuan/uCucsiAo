@@ -3,34 +3,40 @@ using UnityEngine.SceneManagement;
 
 public class MainGame : MonoBehaviour
 {
-    AOGameManager GM;
-    PacketManager packetManager;
-    TcpSocket gameSocket;
+
+    public AOTilemap tilemap;
+
+    private AOGameManager GM;
+    private PacketManager _packetManager;
+    private TcpSocket _gameSocket;
 
     void Awake()
     {
         GM = AOGameManager.Instance;
+        _packetManager = PacketManager.Instance;
+        _gameSocket = AOGameManager.gameSocket;
 
-        packetManager = PacketManager.Instance;
-
-        gameSocket = AOGameManager.gameSocket;
-
+        GM.MainGamewindow = this;
         GM.playerObject = Instantiate(GM.playerObject, new Vector3(0, 0, 0), Quaternion.identity);
-
+        GM.playerObject.layer = 2;
         Debug.Log("Current game state when Awakes: " + GM.gameState);
+
     }
 
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Current game state when main game Starts: " + GM.gameState);
-        GM.playerObject.transform.position = new Vector3(GM.charList[GM.currentAccount.userCharIndex].posX, GM.charList[GM.currentAccount.userCharIndex].posY, GM.playerObject.transform.position.z);
+
+        tilemap.LoadMap(GM.currentAccount.userMap);
+
+        GM.playerObject.transform.position = GM.charList[GM.currentAccount.userCharIndex].pos.MapPositionToVector3();
 
         foreach (var item in GM.mapData)
         {
-            if (item.Value.blocked)
+            if (item.Value.blocked == 1)
             {
-                Instantiate(GM.blockObject, new Vector3(item.Key.x, item.Key.y, 0), Quaternion.identity);
+                Instantiate(GM.blockObject, new Vector3(item.Key.x, 99 - item.Key.y, 0), Quaternion.identity);
             }
         }
     }
@@ -38,7 +44,7 @@ public class MainGame : MonoBehaviour
     void Update()
     {
 
-        if (gameSocket.IsConnected())
+        if (_gameSocket.IsConnected())
         {
             HandleTCPData();
         }
@@ -47,14 +53,14 @@ public class MainGame : MonoBehaviour
 
     private void HandleTCPData()
     {
-        if (gameSocket.IsDataAvailableToRead())
+        if (_gameSocket.IsDataAvailableToRead())
         {
-            gameSocket.Receive();
+            _gameSocket.Receive();
         }
 
         if (GM.incomingData.queueLength > 0)
         {
-            packetManager.HandleReceivedData();
+            _packetManager.HandleReceivedData();
         }
 
         if (!GM.outgoingData.locked && GM.outgoingData.queueLength > 0)
@@ -65,7 +71,7 @@ public class MainGame : MonoBehaviour
 
     public void OnDisconnectClicked()
     {
-        gameSocket.Disconnect();
+        _gameSocket.Disconnect();
 
         Debug.Log("Client Disconnected");
 

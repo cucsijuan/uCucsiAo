@@ -399,6 +399,7 @@ public class PacketManager : MonoBehaviour
             case ServerPacketID.CharacterChangeNick:
                 break;
             case ServerPacketID.CharacterMove:
+                HandleCharacterMove();
                 break;
             case ServerPacketID.ForceCharMove:
                 break;
@@ -717,7 +718,7 @@ public class PacketManager : MonoBehaviour
 
         byte slot = buffer.ReadByte();
 
-        string str;
+        // string str;
 
         short[] UserHechizos = new short[35]; //TODO: esto tiene que ser parte de un objeto con la data del user
 
@@ -790,7 +791,7 @@ public class PacketManager : MonoBehaviour
 
         string chat;
         short fontIndex;
-        string str;
+       //  string str;
         Color color;
 
         chat = buffer.ReadASCIIString();
@@ -857,8 +858,8 @@ public class PacketManager : MonoBehaviour
         GM.incomingData.ReadByte();
 
         //TODO: this should be set on an Object that stores player data
-        short userMap = GM.incomingData.ReadInt16();
-        string nameMap = GM.incomingData.ReadASCIIString();
+        GM.currentAccount.userMap = GM.incomingData.ReadInt16();
+        GM.currentAccount.mapName = GM.incomingData.ReadASCIIString();
 
         //TODO: Once on-the-fly editor is implemented check for map version before loading....
         //For now we just drop it
@@ -866,14 +867,14 @@ public class PacketManager : MonoBehaviour
 
         //TODO:  in this part the map gets loaded from a file, rain played see VB, for now im filling the map data here
 
-        MapData tempMapData;
-        tempMapData.blocked = false;
+        MapData tempMapData = new MapData();
+        tempMapData.blocked = 0;
 
         for (int x = 1; x <= 100; x++)
         {
             for (int y = 1; y <= 100; y++)
             {
-                GM.mapData.Add(new Vector2(x, y), tempMapData);
+                GM.mapData.Add(new AOPosition(x, y), tempMapData);
             }
         }
     }
@@ -1025,7 +1026,7 @@ public class PacketManager : MonoBehaviour
         buffer.ReadByte();
 
         string chat = buffer.ReadASCIIString();
-        string str;
+        // string str;
         Color color;
 
         if (chat.IndexOf('~') == 0)
@@ -1342,12 +1343,11 @@ public class PacketManager : MonoBehaviour
         short body = buffer.ReadInt16();
         short head = buffer.ReadInt16();
         EHeading heading = (EHeading)buffer.ReadByte();
-        GM.charList[charIndex].posX = buffer.ReadByte();
-        GM.charList[charIndex].posY = buffer.ReadByte();
+        byte posX = buffer.ReadByte();
+        byte posY = buffer.ReadByte();
         short weapon = buffer.ReadInt16();
         short shield = buffer.ReadInt16();
         short helmet = buffer.ReadInt16();
-
 
         //TODO: these first two are for setting FXs. also all of these reads are set on the Charlist see VB code
         //SetFX
@@ -1367,6 +1367,28 @@ public class PacketManager : MonoBehaviour
 
         //TODO: we make the char 
 
+        Character tempCharacter;
+
+        if (GM.charList.ContainsKey(charIndex))
+        {
+            tempCharacter = GM.charList[charIndex];
+            tempCharacter.pos = new AOPosition(posX, posY);
+
+            GM.charList[charIndex] = tempCharacter;
+        }
+        else
+        {
+            tempCharacter.charIndex = charIndex;
+            tempCharacter.pos = new AOPosition(posX, posY);
+            GM.charList.Add(charIndex, tempCharacter);
+        }
+
+        //TODO: this should be done in a function in the AOtilemap
+        AOPosition tempPos = new AOPosition(posX, posY);
+        MapData TempMapData = GM.mapData[tempPos];
+        TempMapData.charIndex = charIndex;
+        GM.mapData[tempPos] = TempMapData;
+
         GM.incomingData.CopyBuffer(buffer);
 
     }
@@ -1381,14 +1403,14 @@ public class PacketManager : MonoBehaviour
 
         GM.incomingData.ReadByte();
 
-        Vector2 mapCoord = new Vector2(GM.incomingData.ReadByte(), GM.incomingData.ReadByte());
+        AOPosition mapCoord = new AOPosition(GM.incomingData.ReadByte(), GM.incomingData.ReadByte());
         bool block = GM.incomingData.ReadBoolean();
 
         //TODO: Set block on map
         MapData TempData;
         if (GM.mapData.TryGetValue(mapCoord,out TempData))
         {
-            TempData.blocked = !TempData.blocked;
+            TempData.blocked = TempData.blocked == 1 ?  (byte)0 : (byte)1;
             GM.mapData[mapCoord] = TempData;
         }
         else
@@ -1427,9 +1449,86 @@ public class PacketManager : MonoBehaviour
 
         GM.incomingData.ReadByte();
 
-        //TODO: remove old user and proper map position setting
-        GM.charList[GM.currentAccount.userCharIndex].posX = GM.incomingData.ReadByte();
-        GM.charList[GM.currentAccount.userCharIndex].posY = GM.incomingData.ReadByte();
+
+        byte posX = GM.incomingData.ReadByte();
+        byte posY = GM.incomingData.ReadByte();
+
+        //TODO: make this in another place?
+        //Remove index in older pos
+        if (GM.mapData[GM.currentAccount.userPos].charIndex == GM.currentAccount.userCharIndex)
+        {
+            MapData tempData = GM.mapData[GM.currentAccount.userPos];
+            tempData.charIndex = 0;
+            GM.mapData[GM.currentAccount.userPos] = tempData;
+        }
+
+        GM.currentAccount.userPos = new AOPosition(posX, posY);
+
+        //No es necesario pero lo hago para tener la pos en el charindex tambien.
+        if (GM.charList.ContainsKey(GM.currentAccount.userCharIndex))
+        {
+            Character tempCharacter;
+            tempCharacter = GM.charList[GM.currentAccount.userCharIndex];
+            tempCharacter.pos = new AOPosition(posX, posY);
+
+            GM.charList[GM.currentAccount.userCharIndex] = tempCharacter;
+        }
+        else
+        {
+            Debug.LogError("HandlePosUpdate: user charindex not found on charlist." + GM.currentAccount.userCharIndex);
+        }
+
+    }
+
+    public void HandleCharacterMove()
+    {
+        if (GM.incomingData.queueLength < 3)
+        {
+            Debug.Log("HandleCharacterMove: not enough data to read");
+            return;
+        }
+
+        GM.incomingData.ReadByte();
+
+        short charIndex = GM.incomingData.ReadInt16();
+        byte posX = GM.incomingData.ReadByte();
+        byte posY = GM.incomingData.ReadByte();
+
+        AOPosition tempPos = new AOPosition(posX, posY);
+
+        //TODO: this should be done in a function in the AOtilemap
+        MapData TempMapData = GM.mapData[GM.charList[charIndex].pos];
+        TempMapData.charIndex = 0;
+        GM.mapData[GM.charList[charIndex].pos] = TempMapData;
+
+        //TODO: this should be done in a function in the AOtilemap
+        TempMapData = GM.mapData[tempPos];
+        TempMapData.charIndex = charIndex;
+        GM.mapData[tempPos] = TempMapData;
+
+        //TODO: borra el Fx de meditar
+
+        //TODO: hace ruidos de pasos si no es gm
+
+        //TODO: mueve el pj por ahora actualizo el charlist nomas
+        Character TempChar = GM.charList[charIndex];
+        TempChar.pos = tempPos;
+        GM.charList[charIndex] = TempChar;
+    }
+
+    public void HandleForceCharMove()
+    {
+        if (GM.incomingData.queueLength < 2)
+        {
+            Debug.Log("HandleForceCharMove: not enough data to read");
+            return;
+        }
+
+        GM.incomingData.ReadByte();
+
+        byte direction = GM.incomingData.ReadByte();
+
+        GM.playerObject.GetComponent<PlayerController>().MoveChar((EHeading)direction);
 
     }
 

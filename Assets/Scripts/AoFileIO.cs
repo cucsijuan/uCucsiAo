@@ -9,7 +9,7 @@ public class AoFileIO
     {
         var readTimeWatch = System.Diagnostics.Stopwatch.StartNew();
 
-        string fileName = Application.dataPath + "/Data/graficos.ind"; //TODO: hardcoded for more pleasure.
+        string fileName = Application.dataPath + "/Resources/Data/graficos.ind"; //TODO: hardcoded for more pleasure. need error handling
 
         GrhData[] grhData = new GrhData[0];
 
@@ -86,4 +86,99 @@ public class AoFileIO
 
         return grhData;
     }
+
+    public static Dictionary<AOPosition, MapData> LoadMaps(int map)
+    {
+        var readTimeWatch = System.Diagnostics.Stopwatch.StartNew();
+        byte byFlags;
+
+        string fileName = Application.dataPath + "/Resources/Data/Maps/Mapa" + map + ".map"; //TODO: hardcoded for more pleasure.
+
+        Dictionary<AOPosition, MapData> mapData = new Dictionary<AOPosition, MapData>();
+
+        if (File.Exists(fileName))
+        {
+            using (BinaryReader reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
+            {
+                int mapVersion = reader.ReadInt16();
+
+                string desc = System.Text.Encoding.ASCII.GetString(reader.ReadBytes(255));
+                int CRC = reader.ReadInt32();
+                int MagicWord = reader.ReadInt32();
+
+                reader.ReadDouble();
+
+                for (int y = 0; y < 100; y++)
+                {
+                    for (int x = 0; x < 100; x++)
+                    {
+                        byFlags = reader.ReadByte();
+
+                        AOPosition pos = new AOPosition(x, y);
+                        MapData tempData = new MapData();
+
+                        tempData.graphic = new Grh[4];
+
+                        tempData.blocked = (byte)(byFlags & 1);
+                        tempData.graphic[0].grhIndex = reader.ReadInt32();
+                        //TODO: llama a InitGrh aca
+
+                        if ((byFlags & 2) != 0)
+                        {
+                            tempData.graphic[1].grhIndex = reader.ReadInt32();
+                            //TODO: llama a InitGrh aca
+                        }
+                        else
+                        {
+                            tempData.graphic[1].grhIndex = 0;
+                        }
+
+                        if ((byFlags & 4) != 0)
+                        {
+                            tempData.graphic[2].grhIndex = reader.ReadInt32();
+                            //TODO: llama a InitGrh aca
+                        }
+                        else
+                        {
+                            tempData.graphic[2].grhIndex = 0;
+                        }
+
+                        if ((byFlags & 8) != 0)
+                        {
+                            tempData.graphic[3].grhIndex = reader.ReadInt32();
+                            //TODO: llama a InitGrh aca
+                        }
+                        else
+                        {
+                            tempData.graphic[3].grhIndex = 0;
+                        }
+
+                        if ((byFlags & 16) != 0)
+                        {
+                            tempData.trigger = reader.ReadInt16();
+                            //TODO: llama a InitGrh aca
+                        }
+
+                        if (tempData.charIndex > 0)
+                        {
+                            tempData.charIndex = 0;
+                        }
+
+                        //TODO: descomentar cuando implemente objetos
+                        /*if (tempData.objIndex > 0)
+                        {
+                            tempData.objIndex = 0;
+                        }*/
+
+                        mapData.Add(pos, tempData);
+
+
+                    }
+                }
+            }
+        }
+
+        return mapData;
+    }
+
 }
