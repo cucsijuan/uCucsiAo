@@ -60,6 +60,7 @@ public class MainMenu : MonoBehaviour
         GM.OnStateChange += HandleOnStateChange;
         GM.MainMenuWindow = this;
         GM.InitProtocol();
+        GM.InitGrhData();
 
         packetManager = PacketManager.Instance;
 

@@ -101,20 +101,25 @@ public struct AccountInfo
     public string accountHash;
 
     public short userCharIndex;
+    public int userMap;
+    public string mapName;
+    public AOPosition userPos;
 
     public AccountInfo(string name, string hash)
     {
         accountName = name;
         accountHash = hash;
         userCharIndex = 0;
-    }
+        userMap = 0;
+        mapName = "";
+        userPos = new AOPosition(0,0);
+}
 }
 
 public struct Character
 {
     public short charIndex;
-    public short posX;
-    public short posY;
+    public AOPosition pos;
 }
 
 public struct GrhData
@@ -131,9 +136,41 @@ public struct GrhData
     public float speed;
 }
 
+public struct Grh //TODO: this is not useful in this engine keeping it for compatibility, but should check if its is really necessary
+{
+    public int grhIndex;
+    public float frameCounter;
+    public float speed;
+    public byte started;
+    public short loop;
+    public float angle;
+}
+
+public struct WorldPos
+{
+    public short map;
+    public short x;
+    public short y;
+}
+
 public struct MapData
 {
-    public bool blocked;
+    public Grh[] graphic;
+    public short charIndex;
+    public Grh objGrh;
+
+    public short NPCIndex;
+    //public Obj objInfo; //TODO: implement objects
+    public WorldPos tileExit;
+    public byte blocked;
+
+    public short trigger;
+    public int[] engine_Light;
+    public int particle_Group_Index;
+
+    public Grh fX;
+    public short FxIndex;
+    
 }
 
 public delegate void OnStateChangeHandler();
@@ -142,24 +179,33 @@ public class AOGameManager : MonoBehaviour
 {
     public const int NUMSKILLS = 20;
 
-    public event OnStateChangeHandler OnStateChange;
+    public const int MAPMAX_X = 100;
+    public const int MAPMAX_Y = 100;
 
-    public static AOGameManager Instance { get; private set; }
-    public static TcpSocket gameSocket { get; private set; }
+    public event OnStateChangeHandler OnStateChange;    
+
+    private static AOGameManager _instance;
+    public static AOGameManager Instance => _instance;
+
+    private static TcpSocket _gameSocket;
+    public static TcpSocket gameSocket => _gameSocket;
+
     public GameState gameState { get; private set; }
     
     public AccountInfo currentAccount;
 
     public MainMenu MainMenuWindow;
+    public MainGame MainGamewindow;
     public GameObject playerObject;
     public GameObject blockObject; //TODO: used just for debugging
 
     public ByteQueue incomingData;
     public ByteQueue outgoingData;
 
-    public Character[] charList = new Character[10000];
-    public Dictionary<Vector2, MapData> mapData = new Dictionary<Vector2, MapData>();
+    public Dictionary<int, Character> charList = new Dictionary<int, Character>();
+    public Dictionary<AOPosition, MapData> mapData = new Dictionary<AOPosition, MapData>();
     public GrhData[] grhData;
+    public AOSpriteCache spriteCache;
 
     protected AOGameManager() { }
 
@@ -169,11 +215,11 @@ public class AOGameManager : MonoBehaviour
 
         if (Instance != null)
         {
-            Destroy(gameObject);
+            Destroy(this.gameObject);
             return;
         }
 
-        Instance = this;
+        _instance = this;
         incomingData = new ByteQueue();
         outgoingData = new ByteQueue();
 
@@ -188,15 +234,41 @@ public class AOGameManager : MonoBehaviour
     public void OnApplicationQuit()
     {
         gameSocket.Disconnect();
-        Instance = null;
+        _instance = null;
     }
 
     public void InitProtocol()
     {
-        if (gameSocket == null)
+        if (_gameSocket == null)
         {
-            gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
+            _gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
             Debug.Log("Protocol created.");
+        }
+    }
+
+    public void InitGrhData()
+    {
+        try
+        {
+            grhData = AoFileIO.LoadGrhs();
+
+            if (grhData.Length == 0)
+            {
+                Debug.LogError("InitGrhData: No graphics has been loaded.");
+                return;
+            }
+
+            Debug.Log("InitGrhData: Loaded " + grhData.Length + " graphics.");
+
+            spriteCache = new AOSpriteCache();
+            spriteCache.BuildCache();
+
+            Debug.Log("Texture cache built.");
+        }
+        catch (System.InvalidOperationException ex)
+        {
+            Debug.LogError(ex.StackTrace);
+            throw;
         }
     }
 
