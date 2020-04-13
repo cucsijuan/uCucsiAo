@@ -2552,7 +2552,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 265997256}
-  - component: {fileID: 265997259}
   - component: {fileID: 265997258}
   - component: {fileID: 265997257}
   m_Layer: 0
@@ -2618,73 +2617,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 265997255}
   m_CullTransparentMesh: 0
---- !u!1 &778321977
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 778321979}
-  - component: {fileID: 778321978}
-  - component: {fileID: 778321980}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &778321978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 778321977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 793aa59d2602e4b4196e177d02f8dfb5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  
-  
-  
-  
-  MainMenuWindow: {fileID: 1575587115}
-  MainGamewindow: {fileID: 0}
-  playerObject: {fileID: 8508085397032059669, guid: 4d27c551b775fe945abe6f63a5a25b21,
-    type: 3}
-  blockObject: {fileID: 733849996527331876, guid: 3321c0df992f0d04782d4cdd34929532,
-    type: 3}
---- !u!4 &778321979
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 778321977}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 424.7348, y: 240.14099, z: -6.6117716}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &778321980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265997255}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ShowMaskGraphic: 0
 --- !u!1 &276761579
 GameObject:
   m_ObjectHideFlags: 0
@@ -6193,6 +6125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MainMenuWindow: {fileID: 1575587115}
+  MainGamewindow: {fileID: 0}
   playerObject: {fileID: 8508085397032059669, guid: 4d27c551b775fe945abe6f63a5a25b21,
     type: 3}
   blockObject: {fileID: 733849996527331876, guid: 3321c0df992f0d04782d4cdd34929532,

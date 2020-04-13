@@ -190,8 +190,6 @@ public class AOGameManager : MonoBehaviour
     private static TcpSocket _gameSocket;
     public static TcpSocket gameSocket => _gameSocket;
 
-    public static AOGameManager Instance { get; private set; }
-    public static TcpSocket gameSocket { get; private set; }
     public GameState gameState { get; private set; }
     
     public AccountInfo currentAccount;
@@ -217,11 +215,11 @@ public class AOGameManager : MonoBehaviour
 
         if (Instance != null)
         {
-            Destroy(gameObject);
+            Destroy(this.gameObject);
             return;
         }
 
-        Instance = this;
+        _instance = this;
         incomingData = new ByteQueue();
         outgoingData = new ByteQueue();
 
@@ -236,14 +234,14 @@ public class AOGameManager : MonoBehaviour
     public void OnApplicationQuit()
     {
         gameSocket.Disconnect();
-        Instance = null;
+        _instance = null;
     }
 
     public void InitProtocol()
     {
-        if (gameSocket == null)
+        if (_gameSocket == null)
         {
-            gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
+            _gameSocket = new TcpSocket(ref incomingData,ref outgoingData);
             Debug.Log("Protocol created.");
         }
     }
