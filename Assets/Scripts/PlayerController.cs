@@ -6,16 +6,36 @@ public class PlayerController : MonoBehaviour
 {
     private const float MOVE_TIMESTEP = 0.15f;
 
+    [SerializeField] GameObject bodyLayer;
+    [SerializeField] GameObject weaponLayer;
+    [SerializeField] GameObject headLayer;
+    [SerializeField] GameObject helmetLayer;
+    
     public float movementSpeed = 1f;
 
-    Animator animator;
+    Animator bodyAnimator;
+    Animator headAnimator;
+    Animator helmetAnimator;
+    Animator weaponAnimator;
+
     Rigidbody2D rigidBody;
     SpriteRenderer spriteRenderer;
 
     private AOGameManager GM;
     private PacketManager packetManager;
 
-    private bool moving = false;
+    private EHeading _heading;
+    public EHeading Heading
+    {
+        get { return _heading; }
+    }
+
+    private bool _moving = false;
+    public bool Moving
+    {
+        get { return _moving; }
+    }
+
     private float lastSentInputTime = 0f;
     private float movementStep = 0f;
 
@@ -31,19 +51,23 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        animator = GetComponent<Animator>();
-        rigidBody = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        bodyAnimator = bodyLayer.GetComponent<Animator>();
+        weaponAnimator = weaponLayer.GetComponent<Animator>();
+        headAnimator = headLayer.GetComponent<Animator>();
+        helmetAnimator = helmetLayer.GetComponent<Animator>();
+
+        rigidBody = gameObject.GetComponentInChildren<Rigidbody2D>();
+        spriteRenderer = gameObject.GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Update()
     {
-        if (moving == false)
+        if (_moving == false)
         {
             CheckKeys();
         }
         
-        if (moving)
+        if (_moving)
         {
             movementStep += Time.deltaTime * movementSpeed;
 
@@ -55,10 +79,21 @@ public class PlayerController : MonoBehaviour
             {
                 movementStep = 0f;
                 transform.position = targetPos;
-                moving = false;
+                _moving = false;
 
             }
         }
+
+        bodyAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
+        bodyAnimator.SetFloat("Heading", (float)_heading);
+
+        weaponAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
+        weaponAnimator.SetFloat("Heading", (float)_heading);
+
+        headAnimator.SetFloat("Heading", (float)_heading);
+
+        helmetAnimator.SetFloat("Heading", (float)_heading);
+
     }
 
     private void CheckKeys()
@@ -199,6 +234,8 @@ public class PlayerController : MonoBehaviour
                 break;
         }
 
+        _heading = heading;
+
         AOPosition posToCheck = AOPosition.ParseVector3(Vector3Int.CeilToInt(transform.position)) + directionVector;
 
         if (!IsValidPos(posToCheck))
@@ -207,7 +244,7 @@ public class PlayerController : MonoBehaviour
         }
 
         GM.currentAccount.userPos = posToCheck;
-        moving = true;
+        _moving = true;
     }
 
     public void MoveChar(EHeading heading)
@@ -244,7 +281,7 @@ public class PlayerController : MonoBehaviour
         tempChar.pos = posToCheck;
         GM.charList[GM.currentAccount.userCharIndex] = tempChar;
 
-        moving = true;
+        _moving = true;
     }
 
     private bool IsValidPos(AOPosition posToCheck)
@@ -267,6 +304,18 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("IsValidPos: map position not found: " + posToCheck + ". Error:" + ex.Message);
             throw;
         }
+    }
+
+    private T GetChildComponentByName<T>(string name) where T : Component
+    {
+        foreach (T component in GetComponentsInChildren<T>(true))
+        {
+            if (component.gameObject.name == name)
+            {
+                return component;
+            }
+        }
+        return null;
     }
 
 }
