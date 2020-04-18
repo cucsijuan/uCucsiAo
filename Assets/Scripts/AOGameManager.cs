@@ -173,6 +173,27 @@ public struct MapData
     
 }
 
+public struct HeadData
+{
+    public Grh[] Heads;
+}
+
+public struct BodyData
+{
+    public Grh[] Bodies;
+    public Vector2 HeadOffset;
+}
+
+public struct WeaponAnimData
+{
+    public Grh[] WeaponAnims;
+}
+
+public struct ShieldAnimData
+{
+    public Grh[] ShieldAnims;
+}
+
 public delegate void OnStateChangeHandler();
 
 public class AOGameManager : MonoBehaviour
@@ -204,8 +225,17 @@ public class AOGameManager : MonoBehaviour
 
     public Dictionary<int, Character> charList = new Dictionary<int, Character>();
     public Dictionary<AOPosition, MapData> mapData = new Dictionary<AOPosition, MapData>();
+
+    //***** Graphic stuff ********************
     public GrhData[] grhData;
+    public BodyData[] bodyData;
+    public HeadData[] headData;
+    public HeadData[] helmetAnimData;
+    public WeaponAnimData[] weaponAnimData;
+    public ShieldAnimData[] shieldAnimData;
+    //TODO: public FxData[] As tIndiceFx
     public AOSpriteCache spriteCache;
+    //*****************************************
 
     protected AOGameManager() { }
 
@@ -264,6 +294,13 @@ public class AOGameManager : MonoBehaviour
             spriteCache.BuildCache();
 
             Debug.Log("Texture cache built.");
+
+            bodyData = AoFileIO.LoadBodies();
+            headData = AoFileIO.LoadHeads();
+            helmetAnimData = AoFileIO.LoadHelmets();
+            weaponAnimData = AoFileIO.LoadWeaponAnims();
+            
+
         }
         catch (System.InvalidOperationException ex)
         {

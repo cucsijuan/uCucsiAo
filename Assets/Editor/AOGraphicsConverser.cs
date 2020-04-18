@@ -43,6 +43,23 @@ public class AOGraphicsConverser : ScriptableWizard
             Debug.LogError(ex.StackTrace);
             throw;
         }
+
+        var bodies = AoFileIO.LoadBodies();
+
+        for (int i = 0; i < bodies.Length; i++)
+        {
+            int[] frames = { grhData[bodies[i].Bodies[0].grhIndex].Frames[0] };
+            CreateAnims(frames, bodies[i].Bodies[0].grhIndex, "IDLE_");
+
+            frames[0] = grhData[bodies[i].Bodies[1].grhIndex].Frames[0];
+            CreateAnims(frames, bodies[i].Bodies[1].grhIndex, "IDLE_");
+
+            frames[0] = grhData[bodies[i].Bodies[2].grhIndex].Frames[0];
+            CreateAnims(frames, bodies[i].Bodies[2].grhIndex, "IDLE_");
+
+            frames[0] = grhData[bodies[i].Bodies[3].grhIndex].Frames[0];
+            CreateAnims(frames, bodies[i].Bodies[3].grhIndex, "IDLE_");
+        }
     }
 
     private void OnWizardUpdate()
@@ -169,7 +186,7 @@ public class AOGraphicsConverser : ScriptableWizard
         helpString = "Slicing Done";
     }
 
-    private void CreateAnims(int[] frames, int index)
+    private void CreateAnims(int[] frames, int index, string namePrefix = "")
     {
         ObjectReferenceKeyframe[] spriteKeyFrames = new ObjectReferenceKeyframe[frames.Length];
         AnimationClip animClip = new AnimationClip();
@@ -204,7 +221,7 @@ public class AOGraphicsConverser : ScriptableWizard
         }
 
         AnimationUtility.SetObjectReferenceCurve(animClip, spriteBinding, spriteKeyFrames);
-        AssetDatabase.CreateAsset(animClip, "assets/Animations/" + index + ".anim");
+        AssetDatabase.CreateAsset(animClip, "Assets/Resources/Animations/" + namePrefix + index + ".anim");
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
