@@ -1312,15 +1312,15 @@ public class PacketManager : MonoBehaviour
         short CharIndex = GM.incomingData.ReadInt16();
 
         //TODO: set the char paperdolling and fx
-        GM.incomingData.ReadInt16(); //body
+        short body = GM.incomingData.ReadInt16(); //body
 
-        GM.incomingData.ReadInt16();//head
+        short head = GM.incomingData.ReadInt16();//head
 
-        GM.incomingData.ReadInt16();//weapon
+        short weapon = GM.incomingData.ReadInt16();//weapon
 
-        GM.incomingData.ReadInt16(); //shield
+        short shield = GM.incomingData.ReadInt16(); //shield
 
-        GM.incomingData.ReadInt16(); // helmet
+        short helmet = GM.incomingData.ReadInt16(); // helmet
 
         GM.incomingData.ReadInt16();// FX
         GM.incomingData.ReadInt16();// FX second param
@@ -1374,6 +1374,7 @@ public class PacketManager : MonoBehaviour
         {
             tempCharacter = GM.charList[charIndex];
             tempCharacter.pos = new AOPosition(posX, posY);
+            tempCharacter.body = body;
 
             GM.charList[charIndex] = tempCharacter;
         }
@@ -1381,8 +1382,11 @@ public class PacketManager : MonoBehaviour
         {
             tempCharacter.charIndex = charIndex;
             tempCharacter.pos = new AOPosition(posX, posY);
+            tempCharacter.body = body;
             GM.charList.Add(charIndex, tempCharacter);
         }
+
+        GM.CreateCharacter(tempCharacter);
 
         //TODO: this should be done in a function in the AOtilemap
         AOPosition tempPos = new AOPosition(posX, posY);

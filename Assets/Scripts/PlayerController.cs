@@ -10,13 +10,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject weaponLayer;
     [SerializeField] GameObject headLayer;
     [SerializeField] GameObject helmetLayer;
-    
+    [SerializeField] bool isNpc = false; //TODO: Refactor this, we need to make an npc controller
+
     public float movementSpeed = 1f;
 
-    Animator bodyAnimator;
-    Animator headAnimator;
-    Animator helmetAnimator;
-    Animator weaponAnimator;
+    Animator _bodyAnimator;
+    public Animator BodyAnimator { get { return _bodyAnimator; } }
+    Animator _headAnimator;
+    public Animator HeadAnimator { get { return _headAnimator; } }
+    Animator _helmetAnimator;
+    public Animator HelmetAnimator { get { return _helmetAnimator; } }
+    Animator _weaponAnimator;
+    public Animator WeaponAnimator { get { return _weaponAnimator; } }
 
     Rigidbody2D rigidBody;
     SpriteRenderer spriteRenderer;
@@ -46,23 +51,23 @@ public class PlayerController : MonoBehaviour
         GM = AOGameManager.Instance;
 
         packetManager = PacketManager.Instance;
+
+        _bodyAnimator = bodyLayer.GetComponent<Animator>();
+        _weaponAnimator = weaponLayer.GetComponent<Animator>();
+        _headAnimator = headLayer.GetComponent<Animator>();
+        _helmetAnimator = helmetLayer.GetComponent<Animator>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        bodyAnimator = bodyLayer.GetComponent<Animator>();
-        weaponAnimator = weaponLayer.GetComponent<Animator>();
-        headAnimator = headLayer.GetComponent<Animator>();
-        helmetAnimator = helmetLayer.GetComponent<Animator>();
-
         rigidBody = gameObject.GetComponentInChildren<Rigidbody2D>();
         spriteRenderer = gameObject.GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Update()
     {
-        if (_moving == false)
+        if (_moving == false && !isNpc)
         {
             CheckKeys();
         }
@@ -84,15 +89,15 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        bodyAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
-        bodyAnimator.SetFloat("Heading", (float)_heading);
+        _bodyAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
+        _bodyAnimator.SetFloat("Heading", (float)_heading);
 
-        weaponAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
-        weaponAnimator.SetFloat("Heading", (float)_heading);
+        _weaponAnimator.SetLayerWeight(1, System.Convert.ToSingle(_moving));
+        _weaponAnimator.SetFloat("Heading", (float)_heading);
 
-        headAnimator.SetFloat("Heading", (float)_heading);
+        _headAnimator.SetFloat("Heading", (float)_heading);
 
-        helmetAnimator.SetFloat("Heading", (float)_heading);
+        _helmetAnimator.SetFloat("Heading", (float)_heading);
 
     }
 

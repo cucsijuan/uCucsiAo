@@ -120,6 +120,7 @@ public struct Character
 {
     public short charIndex;
     public AOPosition pos;
+    public int body;
 }
 
 public struct GrhData
@@ -218,6 +219,7 @@ public class AOGameManager : MonoBehaviour
     public MainMenu MainMenuWindow;
     public MainGame MainGamewindow;
     public GameObject playerObject;
+    public GameObject npcObject;
     public GameObject blockObject; //TODO: used just for debugging
 
     public ByteQueue incomingData;
@@ -307,6 +309,50 @@ public class AOGameManager : MonoBehaviour
             Debug.LogError(ex.StackTrace);
             throw;
         }
+    }
+
+    public void UpdateCharBody(ref Character charInfo, PlayerController playerController) //TODO: this function should not be here maybe on a character base class?
+    {
+        AnimatorOverrideController aoc = new AnimatorOverrideController(playerController.BodyAnimator.runtimeAnimatorController);
+        var clips = aoc.animationClips;
+
+        var idleAnims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+
+        for (int i = 0; i < bodyData[charInfo.body].Bodies.Length; i++)
+        {
+            AnimationClip tempAnim = Resources.Load<AnimationClip>("Animations/" + bodyData[charInfo.body].Bodies[i].grhIndex /*+ ".anim"*/);
+
+            AnimationClip tempIdleAnim = Resources.Load<AnimationClip>("Animations/IDLE_" + bodyData[charInfo.body].Bodies[i].grhIndex /*+ ".anim"*/);
+
+            if (tempAnim == null)
+            {
+                Debug.LogError("Animation: " + bodyData[charInfo.body].Bodies[i] + " does not found while loading body " + charInfo.body);
+                return;
+            }
+
+            if (tempIdleAnim == null)
+            {
+                Debug.LogError("Animation: IDLE_" + bodyData[charInfo.body].Bodies[i] + " does not found while loading body " + charInfo.body);
+                return;
+            }
+
+            idleAnims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+        }
+
+        idleAnims.AddRange(anims);
+        aoc.ApplyOverrides(idleAnims);
+
+        playerController.BodyAnimator.runtimeAnimatorController = aoc;
+    }
+
+    public void CreateCharacter(Character charInfo)
+    {
+        GameObject NewChar = GameObject.Instantiate(npcObject, charInfo.pos.MapPositionToVector3(), Quaternion.identity);
+        PlayerController playerController = NewChar.GetComponent<PlayerController>();
+
+        UpdateCharBody(ref charInfo, playerController);
     }
 
     public void FlushBuffer()
