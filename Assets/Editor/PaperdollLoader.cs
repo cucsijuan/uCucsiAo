@@ -87,20 +87,53 @@ public class PaperdollLoader : EditorWindow
         if (grhData == null || grhData.Length == 0)
             return;
 
-        for (int i = 0; i < bodies.Length; i++)
+        int i = 0;
+
+        try
         {
-            int[] frames = { grhData[bodies[i].Bodies[0].grhIndex].Frames[0] };
-            CreateAnims(frames, bodies[i].Bodies[0].grhIndex, "IDLE_");
+            for (i = 0; i < bodies.Length; i++)
+            {
+                int[] frames = new int[1];
+                int[] sprites = new int[4];
 
-            frames[0] = grhData[bodies[i].Bodies[1].grhIndex].Frames[0];
-            CreateAnims(frames, bodies[i].Bodies[1].grhIndex, "IDLE_");
+                //WARNING, just checking in the first body, assuming that if the sprite has no animation all other bodies will behave the same.
+                if (grhData[bodies[i].Bodies[0].grhIndex].Frames == null || grhData[bodies[i].Bodies[0].grhIndex].Frames.Length == 0)
+                {
+                    sprites[0] = grhData[bodies[i].Bodies[0].grhIndex].fileNum;
+                    sprites[1] = grhData[bodies[i].Bodies[1].grhIndex].fileNum;
+                    sprites[2] = grhData[bodies[i].Bodies[2].grhIndex].fileNum;
+                    sprites[3] = grhData[bodies[i].Bodies[1].grhIndex].fileNum;
+                }
+                else
+                {
+                    sprites[0] = grhData[bodies[i].Bodies[0].grhIndex].Frames[0];
+                    sprites[1] = grhData[bodies[i].Bodies[1].grhIndex].Frames[0];
+                    sprites[2] = grhData[bodies[i].Bodies[2].grhIndex].Frames[0];
+                    sprites[3] = grhData[bodies[i].Bodies[3].grhIndex].Frames[0];
+                }
 
-            frames[0] = grhData[bodies[i].Bodies[2].grhIndex].Frames[0];
-            CreateAnims(frames, bodies[i].Bodies[2].grhIndex, "IDLE_");
 
-            frames[0] = grhData[bodies[i].Bodies[3].grhIndex].Frames[0];
-            CreateAnims(frames, bodies[i].Bodies[3].grhIndex, "IDLE_");
+                frames[0] = sprites[0];
+                CreateAnims(frames, bodies[i].Bodies[0].grhIndex, "IDLE_");
+
+
+                frames[0] = sprites[1];
+                CreateAnims(frames, bodies[i].Bodies[1].grhIndex, "IDLE_");
+
+                frames[0] = sprites[2];
+                CreateAnims(frames, bodies[i].Bodies[2].grhIndex, "IDLE_");
+
+                frames[0] = sprites[3];
+                CreateAnims(frames, bodies[i].Bodies[3].grhIndex, "IDLE_");
+            }
         }
+        catch (Exception)
+        {
+            Debug.Log("error while loading " + i + " body");
+            throw;
+        }
+
+        Debug.Log("Loaded " + i + " bodies.");
     }
 
     private void CreateIdleAWeaponAnimations()
