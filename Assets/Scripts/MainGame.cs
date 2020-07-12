@@ -30,7 +30,7 @@ public class MainGame : MonoBehaviour
 
         tilemap.LoadMap(GM.currentAccount.userMap);
 
-        GM.playerObject.transform.position = GM.charList[GM.currentAccount.userCharIndex].pos.MapPositionToVector3();
+        GM.playerObject.transform.position = GM.charList[GM.currentAccount.userCharIndex].characterData.pos.MapPositionToVector3();
 
         foreach (var item in GM.mapData)
         {

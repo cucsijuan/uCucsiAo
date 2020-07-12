@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -52,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
         packetManager = PacketManager.Instance;
 
+        _heading = EHeading.SOUTH;
+
         _bodyAnimator = bodyLayer.GetComponent<Animator>();
         _weaponAnimator = weaponLayer.GetComponent<Animator>();
         _headAnimator = headLayer.GetComponent<Animator>();
@@ -71,7 +74,7 @@ public class PlayerController : MonoBehaviour
         {
             CheckKeys();
         }
-        
+
         if (_moving)
         {
             movementStep += Time.deltaTime * movementSpeed;
@@ -206,15 +209,6 @@ public class PlayerController : MonoBehaviour
 
 
     }
-    
-
-
-    private void FixedUpdate()
-    {
-
-
-        
-    }
 
     public void MoveUser(EHeading heading)
     {
@@ -282,11 +276,175 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        //TODO: keeping the character data just for legacy reasons, but we have to keep that information in the player/npc object
         Character tempChar = GM.charList[GM.currentAccount.userCharIndex];
-        tempChar.pos = posToCheck;
+        tempChar.characterData.pos = posToCheck;
         GM.charList[GM.currentAccount.userCharIndex] = tempChar;
 
         _moving = true;
+    }
+
+    public void UpdateCharPaperdoll(SCharacterData charInfo)
+    {
+        if (charInfo.body == 0)
+        {
+            bodyLayer.GetComponent<SpriteRenderer>().enabled = false;
+        }
+        else
+        {
+            UpdateBody(charInfo.body);
+        }
+
+        if (charInfo.head == 0)
+        {
+            headLayer.GetComponent<SpriteRenderer>().enabled = false;
+        }
+        else
+        {
+            UpdateHead(charInfo.head);
+        }
+       
+        if (charInfo.weapon == 0)
+        {
+            weaponLayer.GetComponent<SpriteRenderer>().enabled = false;
+        }
+        else
+        {
+            UpdateWeapon(charInfo.weapon);
+        }
+
+        if (charInfo.helmet == 0)
+        {
+            helmetLayer.GetComponent<SpriteRenderer>().enabled = false;
+        }
+        else
+        {
+            UpdateHelmet(charInfo.helmet);
+        }
+
+
+    }
+
+    private void UpdateWeapon(int weapon)
+    {
+        AnimatorOverrideController aoc = new AnimatorOverrideController(WeaponAnimator.runtimeAnimatorController);
+        var clips = aoc.animationClips;
+
+        var idleAnims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+
+        for (int i = 0; i < GM.bodyData[weapon].Bodies.Length; i++)
+        {
+            AnimationClip tempAnim = GM.AnimCache.GetAnim(GM.weaponAnimData[weapon].WeaponAnims[i].grhIndex);
+
+            AnimationClip tempIdleAnim = GM.AnimCache.GetIdleAnim(GM.weaponAnimData[weapon].WeaponAnims[i].grhIndex);
+
+            if (tempAnim == null)
+            {
+                Debug.LogError("Animation: " + GM.weaponAnimData[weapon].WeaponAnims[i] + " does not found while loading weapon " + weapon);
+                return;
+            }
+
+            if (tempIdleAnim == null)
+            {
+                Debug.LogError("Animation: IDLE_" + GM.weaponAnimData[weapon].WeaponAnims[i] + " does not found while loading weapon " + weapon);
+                return;
+            }
+
+            idleAnims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+        }
+
+        idleAnims.AddRange(anims);
+        aoc.ApplyOverrides(idleAnims);
+
+        WeaponAnimator.runtimeAnimatorController = aoc;
+    }
+
+    private void UpdateHelmet(int helmet)
+    {
+        AnimatorOverrideController aoc = new AnimatorOverrideController(HelmetAnimator.runtimeAnimatorController);
+        var clips = aoc.animationClips;
+
+        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+
+        for (int i = 0; i < GM.headData[helmet].Heads.Length; i++)
+        {
+            AnimationClip tempAnim = GM.AnimCache.GetHelmetAnim(GM.helmetAnimData[helmet].Heads[i].grhIndex);
+
+            if (tempAnim == null)
+            {
+                Debug.LogError("Animation: " + GM.helmetAnimData[helmet].Heads[i] + " does not found while loading helmet " + helmet);
+                return;
+            }
+
+            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+        }
+
+        aoc.ApplyOverrides(anims);
+
+        HelmetAnimator.runtimeAnimatorController = aoc;
+    }
+
+    private void UpdateHead(int head)
+    {
+        AnimatorOverrideController aoc = new AnimatorOverrideController(HeadAnimator.runtimeAnimatorController);
+        var clips = aoc.animationClips;
+
+        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+
+        for (int i = 0; i < GM.headData[head].Heads.Length; i++)
+        {
+            AnimationClip tempAnim = GM.AnimCache.GetHeadAnim(GM.headData[head].Heads[i].grhIndex);
+
+            if (tempAnim == null)
+            {
+                Debug.LogError("Animation: " + GM.headData[head].Heads[i] + " does not found while loading head " + head);
+                return;
+            }
+
+            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+        }
+
+        aoc.ApplyOverrides(anims);
+
+        HeadAnimator.runtimeAnimatorController = aoc;
+    }
+
+    private void UpdateBody(int body)
+    {
+        AnimatorOverrideController aoc = new AnimatorOverrideController(BodyAnimator.runtimeAnimatorController);
+        var clips = aoc.animationClips;
+
+        var idleAnims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+
+        for (int i = 0; i < GM.bodyData[body].Bodies.Length; i++)
+        {
+            AnimationClip tempAnim = GM.AnimCache.GetAnim(GM.bodyData[body].Bodies[i].grhIndex);
+
+            AnimationClip tempIdleAnim = GM.AnimCache.GetIdleAnim(GM.bodyData[body].Bodies[i].grhIndex);
+
+            if (tempAnim == null)
+            {
+                Debug.LogError("Animation: " + GM.bodyData[body].Bodies[i] + " does not found while loading body " + body);
+                return;
+            }
+
+            if (tempIdleAnim == null)
+            {
+                Debug.LogError("Animation: IDLE_" + GM.bodyData[body].Bodies[i] + " does not found while loading body " + body);
+                return;
+            }
+
+            idleAnims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+        }
+
+        idleAnims.AddRange(anims);
+        aoc.ApplyOverrides(idleAnims);
+
+        BodyAnimator.runtimeAnimatorController = aoc;
     }
 
     private bool IsValidPos(AOPosition posToCheck)

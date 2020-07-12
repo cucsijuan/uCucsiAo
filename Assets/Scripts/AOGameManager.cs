@@ -113,14 +113,23 @@ public struct AccountInfo
         userMap = 0;
         mapName = "";
         userPos = new AOPosition(0,0);
-}
+    }
 }
 
-public struct Character
+public struct SCharacterData
 {
     public short charIndex;
     public AOPosition pos;
     public int body;
+    public int head;
+    public int helmet;
+    public int weapon;
+    public int shield;
+}
+public struct Character
+{
+    public SCharacterData characterData;
+    public PlayerController playerController;
 }
 
 public struct GrhData
@@ -237,6 +246,7 @@ public class AOGameManager : MonoBehaviour
     public ShieldAnimData[] shieldAnimData;
     //TODO: public FxData[] As tIndiceFx
     public AOSpriteCache spriteCache;
+    public AOAnimCache AnimCache;
     //*****************************************
 
     protected AOGameManager() { }
@@ -311,48 +321,30 @@ public class AOGameManager : MonoBehaviour
         }
     }
 
-    public void UpdateCharBody(ref Character charInfo, PlayerController playerController) //TODO: this function should not be here maybe on a character base class?
+    public void InitAnimations()
     {
-        AnimatorOverrideController aoc = new AnimatorOverrideController(playerController.BodyAnimator.runtimeAnimatorController);
-        var clips = aoc.animationClips;
-
-        var idleAnims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
-        var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
-
-        for (int i = 0; i < bodyData[charInfo.body].Bodies.Length; i++)
+        try
         {
-            AnimationClip tempAnim = Resources.Load<AnimationClip>("Animations/" + bodyData[charInfo.body].Bodies[i].grhIndex /*+ ".anim"*/);
+            AnimCache = new AOAnimCache();
+            AnimCache.BuildCache();
 
-            AnimationClip tempIdleAnim = Resources.Load<AnimationClip>("Animations/IDLE_" + bodyData[charInfo.body].Bodies[i].grhIndex /*+ ".anim"*/);
-
-            if (tempAnim == null)
-            {
-                Debug.LogError("Animation: " + bodyData[charInfo.body].Bodies[i] + " does not found while loading body " + charInfo.body);
-                return;
-            }
-
-            if (tempIdleAnim == null)
-            {
-                Debug.LogError("Animation: IDLE_" + bodyData[charInfo.body].Bodies[i] + " does not found while loading body " + charInfo.body);
-                return;
-            }
-
-            idleAnims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
-            anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(aoc.animationClips[i], tempAnim));
+            Debug.Log("Anim cache built.");
         }
-
-        idleAnims.AddRange(anims);
-        aoc.ApplyOverrides(idleAnims);
-
-        playerController.BodyAnimator.runtimeAnimatorController = aoc;
+        catch (System.Exception ex)
+        {
+            Debug.LogError(ex.StackTrace);
+            throw;
+        }
     }
 
-    public void CreateCharacter(Character charInfo)
+    public PlayerController CreateCharacter(SCharacterData charInfo)
     {
         GameObject NewChar = GameObject.Instantiate(npcObject, charInfo.pos.MapPositionToVector3(), Quaternion.identity);
         PlayerController playerController = NewChar.GetComponent<PlayerController>();
 
-        UpdateCharBody(ref charInfo, playerController);
+        playerController.UpdateCharPaperdoll(charInfo);
+
+        return playerController;
     }
 
     public void FlushBuffer()

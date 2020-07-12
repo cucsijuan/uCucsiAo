@@ -1309,9 +1309,8 @@ public class PacketManager : MonoBehaviour
 
         GM.incomingData.ReadByte();
 
-        short CharIndex = GM.incomingData.ReadInt16();
+        short charIndex = GM.incomingData.ReadInt16();
 
-        //TODO: set the char paperdolling and fx
         short body = GM.incomingData.ReadInt16(); //body
 
         short head = GM.incomingData.ReadInt16();//head
@@ -1324,6 +1323,26 @@ public class PacketManager : MonoBehaviour
 
         GM.incomingData.ReadInt16();// FX
         GM.incomingData.ReadInt16();// FX second param
+
+        //TODO: set the char paperdolling and fx
+        if (GM.charList.ContainsKey(charIndex))
+        {
+            var TempChar = GM.charList[charIndex];
+
+            TempChar.characterData.body = body;
+            TempChar.characterData.head = head;
+            TempChar.characterData.weapon = weapon;
+            TempChar.characterData.shield = shield;
+            TempChar.characterData.helmet = helmet;
+            
+            TempChar.playerController.UpdateCharPaperdoll(GM.charList[charIndex].characterData);
+        
+            GM.charList[charIndex] = TempChar;
+        }
+        else
+        {
+            Debug.LogError("HandleCharacterChange: received an invalid charater of index = " + charIndex);
+        }
     }
 
     public void HandleCharacterCreate()
@@ -1367,26 +1386,32 @@ public class PacketManager : MonoBehaviour
         //ENDTODO
 
         //TODO: we make the char 
-
         Character tempCharacter;
 
         if (GM.charList.ContainsKey(charIndex))
         {
             tempCharacter = GM.charList[charIndex];
-            tempCharacter.pos = new AOPosition(posX, posY);
-            tempCharacter.body = body;
+            tempCharacter.characterData.pos = new AOPosition(posX, posY);
+            tempCharacter.characterData.body = body;
+            tempCharacter.characterData.head = head;
+            tempCharacter.characterData.helmet = helmet;
+            tempCharacter.characterData.weapon = weapon;
 
             GM.charList[charIndex] = tempCharacter;
         }
         else
         {
-            tempCharacter.charIndex = charIndex;
-            tempCharacter.pos = new AOPosition(posX, posY);
-            tempCharacter.body = body;
+            tempCharacter = new Character();
+            tempCharacter.characterData.charIndex = charIndex;
+            tempCharacter.characterData.pos = new AOPosition(posX, posY);
+            tempCharacter.characterData.body = body;
+            tempCharacter.characterData.head = head;
+            tempCharacter.characterData.helmet = helmet;
+            tempCharacter.characterData.weapon = weapon;
             GM.charList.Add(charIndex, tempCharacter);
         }
 
-        GM.CreateCharacter(tempCharacter);
+        tempCharacter.playerController = GM.CreateCharacter(tempCharacter.characterData);
 
         //TODO: this should be done in a function in the AOtilemap
         AOPosition tempPos = new AOPosition(posX, posY);
@@ -1474,7 +1499,7 @@ public class PacketManager : MonoBehaviour
         {
             Character tempCharacter;
             tempCharacter = GM.charList[GM.currentAccount.userCharIndex];
-            tempCharacter.pos = new AOPosition(posX, posY);
+            tempCharacter.characterData.pos = new AOPosition(posX, posY);
 
             GM.charList[GM.currentAccount.userCharIndex] = tempCharacter;
         }
@@ -1502,9 +1527,9 @@ public class PacketManager : MonoBehaviour
         AOPosition tempPos = new AOPosition(posX, posY);
 
         //TODO: this should be done in a function in the AOtilemap
-        MapData TempMapData = GM.mapData[GM.charList[charIndex].pos];
+        MapData TempMapData = GM.mapData[GM.charList[charIndex].characterData.pos];
         TempMapData.charIndex = 0;
-        GM.mapData[GM.charList[charIndex].pos] = TempMapData;
+        GM.mapData[GM.charList[charIndex].characterData.pos] = TempMapData;
 
         //TODO: this should be done in a function in the AOtilemap
         TempMapData = GM.mapData[tempPos];
@@ -1517,7 +1542,7 @@ public class PacketManager : MonoBehaviour
 
         //TODO: mueve el pj por ahora actualizo el charlist nomas
         Character TempChar = GM.charList[charIndex];
-        TempChar.pos = tempPos;
+        TempChar.characterData.pos = tempPos;
         GM.charList[charIndex] = TempChar;
     }
 

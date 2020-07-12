@@ -61,6 +61,7 @@ public class MainMenu : MonoBehaviour
         GM.MainMenuWindow = this;
         GM.InitProtocol();
         GM.InitGrhData();
+        GM.InitAnimations();
 
         packetManager = PacketManager.Instance;
 
