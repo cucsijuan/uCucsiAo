@@ -342,6 +342,7 @@ public class AOGameManager : MonoBehaviour
         GameObject NewChar = GameObject.Instantiate(npcObject, charInfo.pos.MapPositionToVector3(), Quaternion.identity);
         PlayerController playerController = NewChar.GetComponent<PlayerController>();
 
+        playerController.CharIndex = charInfo.charIndex;
         playerController.UpdateCharPaperdoll(charInfo);
 
         return playerController;

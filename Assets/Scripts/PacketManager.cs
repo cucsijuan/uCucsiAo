@@ -1387,32 +1387,27 @@ public class PacketManager : MonoBehaviour
 
         //TODO: we make the char 
         Character tempCharacter;
+        bool isKeyFound = GM.charList.ContainsKey(charIndex);
 
-        if (GM.charList.ContainsKey(charIndex))
+        tempCharacter = isKeyFound ? GM.charList[charIndex] : new Character();
+       
+        tempCharacter.characterData.pos = new AOPosition(posX, posY);
+        tempCharacter.characterData.body = body;
+        tempCharacter.characterData.head = head;
+        tempCharacter.characterData.helmet = helmet;
+        tempCharacter.characterData.weapon = weapon;
+
+        tempCharacter.playerController = GM.CreateCharacter(tempCharacter.characterData);
+
+        if (isKeyFound)
         {
-            tempCharacter = GM.charList[charIndex];
-            tempCharacter.characterData.pos = new AOPosition(posX, posY);
-            tempCharacter.characterData.body = body;
-            tempCharacter.characterData.head = head;
-            tempCharacter.characterData.helmet = helmet;
-            tempCharacter.characterData.weapon = weapon;
-
             GM.charList[charIndex] = tempCharacter;
         }
         else
         {
-            tempCharacter = new Character();
-            tempCharacter.characterData.charIndex = charIndex;
-            tempCharacter.characterData.pos = new AOPosition(posX, posY);
-            tempCharacter.characterData.body = body;
-            tempCharacter.characterData.head = head;
-            tempCharacter.characterData.helmet = helmet;
-            tempCharacter.characterData.weapon = weapon;
             GM.charList.Add(charIndex, tempCharacter);
         }
-
-        tempCharacter.playerController = GM.CreateCharacter(tempCharacter.characterData);
-
+            
         //TODO: this should be done in a function in the AOtilemap
         AOPosition tempPos = new AOPosition(posX, posY);
         MapData TempMapData = GM.mapData[tempPos];
@@ -1542,8 +1537,39 @@ public class PacketManager : MonoBehaviour
 
         //TODO: mueve el pj por ahora actualizo el charlist nomas
         Character TempChar = GM.charList[charIndex];
+
+        int curX = TempChar.characterData.pos.x;
+        int curY = TempChar.characterData.pos.y;
+
         TempChar.characterData.pos = tempPos;
         GM.charList[charIndex] = TempChar;
+
+        int addX = tempPos.x - curX;
+        int addY = tempPos.y - curY;
+
+        EHeading newHeading = EHeading.NONE;
+
+        if (Mathf.Sign(addX) == 1)
+        {
+            newHeading = EHeading.EAST;
+        }
+        else if (Mathf.Sign(addX) == -1)
+        {
+            newHeading = EHeading.WEST;
+        }
+        if (Mathf.Sign(addY) == -1)
+        {
+            newHeading = EHeading.NORTH;
+        }
+        else if (Mathf.Sign(addX) == 1)
+        {
+            newHeading = EHeading.SOUTH;
+        }
+        if (TempChar.playerController != null)
+        {
+            TempChar.playerController.MoveUser(newHeading);
+        }
+        
     }
 
     public void HandleForceCharMove()

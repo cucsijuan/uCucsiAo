@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rigidBody;
     SpriteRenderer spriteRenderer;
 
-    private AOGameManager GM;
+    protected AOGameManager GM;
     private PacketManager packetManager;
 
     private EHeading _heading;
@@ -40,6 +40,13 @@ public class PlayerController : MonoBehaviour
     public bool Moving
     {
         get { return _moving; }
+    }
+
+    private Int16 _charIndex;
+    public Int16 CharIndex
+    {
+        get { return _charIndex; }
+        set { _charIndex = value; }
     }
 
     private float lastSentInputTime = 0f;
@@ -104,7 +111,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void CheckKeys()
+    public virtual void CheckKeys()
     {
         AddMovementToKeysMovementPressedQueue();
 

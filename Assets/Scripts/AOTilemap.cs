@@ -64,7 +64,7 @@ public class AOTilemap : MonoBehaviour
 
             if (pair.Value.graphic[3].grhIndex != 0)
             {
-                tilemapLayer2.SetTiles(location, new TileBase[] { SetGraphicOnTile(pair, 3) });
+                tilemapLayer3.SetTiles(location, new TileBase[] { SetGraphicOnTile(pair, 3) });
                
             }
         }
